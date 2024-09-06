@@ -5,13 +5,17 @@ using UnityEngine;
 public class Player : MonoBehaviour,ICanTakeDamage
 {
     public int maxHealth = 100;
-    private int currentHealth;
+    public int currentHealth;
     [HideInInspector] public bool isDead = false;
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = maxHealth;
+        UpdateHealth();
     }
+
+ 
+
     // Update is called once per frame
     void Update()
     {
@@ -21,13 +25,22 @@ public class Player : MonoBehaviour,ICanTakeDamage
     {
         if (isDead) return;
         currentHealth -= damage;
+        UpdateHealth();
+
         if (currentHealth < 0)
         {
+            currentHealth = 0;
             DeadPlayer();
         }
     }
     void DeadPlayer()
     {
+        isDead = true;  
         Debug.Log("Player Dead");
     }
-   }
+    void UpdateHealth()
+    {
+        UIManager.Instance.UpdateHealth(currentHealth);
+
+    }
+}
