@@ -24,21 +24,23 @@ public class Enemy : MonoBehaviour,ICanTakeDamage
     private int IsDeadId;
     private EnemyAI enemyAI;
     private Rigidbody2D rb;
+    private EnemyUI enemyUI;
     // Start is called before the first frame update
     void Start()
     {
         currentHealth = maxHealth;
-    }
-    // Update is called once per frame
-    void Update()
-    {
-        
+        anim = GetComponentInChildren<Animator>();
+        IsDeadId = Animator.StringToHash("IsDead");
+        enemyAI = GetComponent<EnemyAI>();
+        rb = GetComponent<Rigidbody2D>();
+        enemyUI = GetComponent<EnemyUI>();
     }
     public void TakeDamage(int damage, Vector2 force, GameObject instigator)
     {
         if (isDead) return;
         currentHealth -= damage;
-        if (currentHealth < 0)
+        enemyUI.UpdateEnemyUI(currentHealth);
+        if (currentHealth <= 0)
         {
             isDead = true;
             DeadEnemy();
@@ -57,16 +59,19 @@ public class Enemy : MonoBehaviour,ICanTakeDamage
         if(isDead) return;
         if (collision.CompareTag("Player"))
         {
-            Debug.Log("hit");
-            Instantiate(fxPrefabs, positionFx.position, Quaternion.identity);
-            AudioManager.Instance.PlayEnemySfxMusic(explosionClip);
-            if (Time.time > nextAttack)
-            {;
-                nextAttack = Time.time + attackRate;
-                ICanTakeDamage damage = collision.GetComponent<ICanTakeDamage>();
-                if ((damage != null))
+            if(collision.GetComponent<Player>().isDead == false)
+            {
+                Instantiate(fxPrefabs, positionFx.position, Quaternion.identity);
+                AudioManager.Instance.PlayEnemySfxMusic(explosionClip);
+                if (Time.time > nextAttack)
                 {
-                    damage.TakeDamage(damagePlayer, Vector2.right, gameObject);
+                    ;
+                    nextAttack = Time.time + attackRate;
+                    ICanTakeDamage damage = collision.GetComponent<ICanTakeDamage>();
+                    if ((damage != null))
+                    {
+                        damage.TakeDamage(damagePlayer, Vector2.right, gameObject);
+                    }
                 }
             }
         }
